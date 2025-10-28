@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Floating Ball Chamber</title>
+<style>
+  body { margin: 0; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+<script>
+
+let scene, camera, renderer, ball;
+let ballSpeed = new THREE.Vector3(0.02, 0.01, 0.015);
+let isTouching = false;
+
+init();
+animate();
+
+function init() {
+    scene = new THREE.Scene();
+
+    // Camera
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+    camera.position.set(0, 5, 25);
+
+    // Renderer
+    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Ambient Light
+    const ambient = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambient);
+
+    // Background Box with GitHub-hosted sprite sheet
+    const loader = new THREE.TextureLoader();
+    const bgTexture = loader.load('https://raw.githubusercontent.com/cardland51-bot/threejs-chamber-/main/igZyUgB.jpeg', function(tex){
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1/10, 1); // adjust '10' to match number of frames in row
+    });
+
+    const bgMat = new THREE.MeshBasicMaterial({ map: bgTexture, side: THREE.BackSide });
+    const bgGeo = new THREE.BoxGeometry(50, 20, 50);
+    const bgMesh = new THREE.Mesh(bgGeo, bgMat);
+    scene.add(bgMesh);
+
+    // Floating Ball
+    const ballGeo = new THREE.SphereGeometry(1.5, 32, 32);
+    const ballMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    ball = new THREE.Mesh(ballGeo, ballMat);
+    scene.add(ball);
+
+    // Touch / pointer events
+    window.addEventListener('pointerdown', () => { isTouching = true; });
+    window.addEventListener('pointerup', () => { isTouching = false; });
+
+    // Resize
+    window.addEventListener('resize', onWindowResize);
+
+    // Animate sprite sheet frames
+    let currentFrame = 0;
+    const totalFrames = 10; // adjust to match your sprite sheet
+    function animateSprite() {
+        currentFrame = (currentFrame + 1) % totalFrames;
+        bgTexture.offset.x = currentFrame / totalFrames;
+        requestAnimationFrame(animateSprite);
+    }
+    animateSprite();
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Ball motion
+    if (!isTouching) {
+        ball.position.add(ballSpeed);
+
+        // Bounce inside chamber
+        if (Math.abs(ball.position.x) > 20) ballSpeed.x *= -1;
+        if (Math.abs(ball.position.y) > 8) ballSpeed.y *= -1;
+        if (Math.abs(ball.position.z) > 20) ballSpeed.z *= -1;
+    } else {
+        // Slow down while touching
+        ballSpeed.multiplyScalar(0.95);
+    }
+
+    // Camera loosely follows ball with sway
+    const sway = Math.sin(Date.now() * 0.001) * 2;
+    camera.position.lerp(new THREE.Vector3(ball.position.x + sway, ball.position.y + 5, ball.position.z + 25), 0.02);
+    camera.lookAt(ball.position);
+
+    renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>
