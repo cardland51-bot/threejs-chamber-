@@ -36,11 +36,10 @@ function init() {
     scene.add(ambient);
 
     // Background Box with GitHub-hosted sprite sheet
-    const loader = new THREE.TextureLoader();
-    const bgTexture = loader.load('https://raw.githubusercontent.com/cardland51-bot/threejs-chamber-/main/igZyUgB.jpeg', function(tex){
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(1/10, 1); // adjust '10' to match number of frames in row
+    const bgTexture = loader.load('igZyUgB.jpeg', function(tex){
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1/10, 1); // adjust '10' to match number of frames in row
     });
 
     const bgMat = new THREE.MeshBasicMaterial({ map: bgTexture, side: THREE.BackSide });
