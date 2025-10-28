@@ -35,11 +35,14 @@ function init() {
     const ambient = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambient);
 
-    // Background Box with GitHub-hosted sprite sheet
+    // Texture loader
+    const loader = new THREE.TextureLoader();
+
+    // Background Box with local image
     const bgTexture = loader.load('igZyUgB.jpeg', function(tex){
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1/10, 1); // adjust '10' to match number of frames in row
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1/10, 1); // adjust '10' to match number of frames in row
     });
 
     const bgMat = new THREE.MeshBasicMaterial({ map: bgTexture, side: THREE.BackSide });
